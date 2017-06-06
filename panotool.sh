@@ -89,7 +89,7 @@ function eqr2cube()
 
 function flatten() 
 {
-    if [ $# -lt 2 ]; then
+    if [ $# -lt 1 ]; then
         echo "not enough args for flatten"
         echo "flatten <inputTif>"
         exit 1
@@ -97,7 +97,7 @@ function flatten()
     EQR="${1}"
 
     # need a mktemp XXX TODO
-    convert "${EQR}" -background black -flatten flat.tif
+    convert -flatten "${EQR}" -background black -alpha remove flat.tif
     mv flat.tif "${EQR}"
 }
 
@@ -113,7 +113,7 @@ function adjustHorizon()
     EQR="${3}"
 
     # need a mktemp XXX TODO
-    convert "${EQR}" -crop ${geom}+0+${horizonOffset}\! -background black -flatten horiz.tif
+    convert "${EQR}" -crop ${geom}+0+${horizonOffset}\! -background black -flatten -alpha remove horiz.tif
     mv horiz.tif "${EQR}"
 }
 
@@ -144,7 +144,6 @@ function process()
     if [ ! -f "${CUBE}" ]; then
         eqr2cube 360app "${FACE}" "${EQR}" "${CUBE}"
     fi
-    exit 0
 }
 
 function batch ()

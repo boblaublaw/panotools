@@ -1,3 +1,10 @@
 # SRC,HFOV,OPTS,EQR,FACE,CUBE,GEOM,HORIZ
 # tab separated
+#
+# lawrence panos:
 ../1906fire/lawrence panos/19060528 waterfront/07823u.tif	150	--rotate=0,-5,3	../output/eqr/waterfront06eqr.tif	2048	../output/cube/waterfront06cube.tif	28102x14051	-562
+#
+# pillsbury panos:
+../1906fire/pillsbury panos/1906 rialto/6a01974u.tif	120		../output/eqr/rialto06eqr.tif	2048	../output/cube/rialto06cube.tif		
+../1906fire/pillsbury panos/1906 turk and market/07589u-clean.tif	120		../output/eqr/turk06eqr.tif	2048	../output/cube/turk06cube.tif	33198x16599	317
+#
