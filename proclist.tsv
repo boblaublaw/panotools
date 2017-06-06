@@ -1,0 +1,4 @@
+# SRC,HFOV,OPTS,EQR,FACE,CUBE,GEOM,HORIZ
+# tab separated
+# vim: noexpandtab
+../1906fire/lawrence panos/19060528 waterfront/07823u.tif	150	--rotate=0,-5,3	../output/eqr/waterfront06eqr.tif	2048	../output/cube/waterfront06cube.tif	28102x14051	-562
