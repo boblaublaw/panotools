@@ -148,10 +148,14 @@ function process()
 
 function batch ()
 {
-    if [ $# -lt 1 ]; then
+    if [ $# -lt 3 ]; then
         echo "not enough args for batch()"
         exit 1
     fi
+    inputDir="${1}"
+    shift
+    outputDir="${1}"
+    shift
     while [ $# -gt 0 ]; do
         tsvFile="${1}"
         echo processing $tsvFile
@@ -164,7 +168,7 @@ function batch ()
             CUBE=`echo "$line"| cut -f6 -d$'\t'`
             GEOM=`echo "$line"| cut -f7 -d$'\t'`
             HORIZ=`echo "$line"| cut -f8 -d$'\t'`
-            process "${SRC}" "${HFOV}" "${OPTS}" "${EQR}" "${FACE}" "${CUBE}" "${GEOM}" "${HORIZ}"
+            process "${inputDir}/${SRC}" "${HFOV}" "${OPTS}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
         done
         shift
     done
