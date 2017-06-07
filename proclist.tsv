@@ -3,7 +3,7 @@
 #
 # lawrence panos:
 1906fire/lawrence panos/19060528 waterfront/07823u.tif	150	--rotate=0,-5,3	eqr/waterfront06eqr.tif	2048	cube/waterfront06cube.tif	28102x14051	-562
-1906fire/lawrence\ panos/19060505\ tenderloin/07824u.tif	150		eqr/tenderloin06eqr.tif	2048	cube/tenderloin06cube.tif
+1906fire/lawrence\ panos/19060505\ tenderloin/07824u.tif	150	--rotate=0,-2,8	eqr/tenderloin06eqr.tif	2048	cube/tenderloin06cube.tif	31464x15732	0
 #
 # pillsbury panos:
 1906fire/pillsbury panos/1906 rialto/6a01974u.tif	120		eqr/rialto06eqr.tif	2048	cube/rialto06cube.tif		
