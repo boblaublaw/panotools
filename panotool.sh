@@ -25,7 +25,7 @@ function cyl2eqr()
     # specify the eqr parameters
     /Applications/Hugin/Hugin.app/Contents/MacOS/pano_modify -c --fov=360x180 ${OPTS} --canvas=AUTO -o "${projectFile}" "${projectFile}"
     # create the EQR tiff
-    /Applications/Hugin/HuginStitchProject.app/Contents/MacOS/nona -o "${EQR}" -m TIFF "${projectFile}"
+    /Applications/Hugin/HuginStitchProject.app/Contents/MacOS/nona -o "${EQR}" -m TIFF "${projectFile}" -z LZW
     rm ${projectFile}
 }
 
@@ -55,7 +55,7 @@ function eqr2cube()
     pushd "${tmpdir}"
 
     # faces created in the following order: front, right, back, left, up, down
-    /Applications/Hugin/PTBatcherGUI.app/Contents/MacOS/nona -o cube_prefix "${b}.pto" --compression LZW 
+    /Applications/Hugin/PTBatcherGUI.app/Contents/MacOS/nona -o cube_prefix "${b}.pto" -z LZW
 
     # default layout is to do nothing:
     flipList=""
@@ -111,6 +111,7 @@ function adjustHorizon()
     geom="${1}"
     horizonOffset="${2}"
     EQR="${3}"
+    echo adjusting horizon by $horizonOffset pixels
 
     # need a mktemp XXX TODO
     convert "${EQR}" -crop ${geom}+0+${horizonOffset}\! -background black -flatten -alpha remove horiz.tif
@@ -159,7 +160,7 @@ function batch ()
     while [ $# -gt 0 ]; do
         tsvFile="${1}"
         echo processing $tsvFile
-        grep -v '^#' "${tsvFile}" | while read line; do
+        grep -v '^#' "${tsvFile}" | grep . | while read line; do
             SRC=`echo "$line"| cut -f1 -d$'\t'`
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
             OPTS=`echo "$line"| cut -f3 -d$'\t'`
