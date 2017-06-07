@@ -1,11 +1,26 @@
 # SRC,HFOV,OPTS,EQR,FACE,CUBE,GEOM,HORIZ
 # tab separated
-#
+
 # lawrence panos:
-1906fire/lawrence panos/19060528 waterfront/07823u.tif	150	--rotate=0,-5,3	eqr/waterfront06eqr.tif	2048	cube/waterfront06cube.tif	28102x14051	-562
-1906fire/lawrence\ panos/19060505\ tenderloin/07824u.tif	150	--rotate=0,-2,8	eqr/tenderloin06eqr.tif	2048	cube/tenderloin06cube.tif	31464x15732	0
-#
+1906fire/lawrence panos/19060528 waterfront/07823u.tif	141	--rotate=0,-5,3	eqr/law-waterfront06eqr.tif	2048	cube/law-waterfront06cube.tif	29896x14948	-504
+1906fire/lawrence panos/19060505 tenderloin/07824u.tif	126	--rotate=0,-2,8	eqr/law-tenderloin06eqr.tif	2048	cube/law-tenderloin06cube.tif	37458x18729	-625
+1906fire/lawrence panos/19060529 nob hill/3c36183u-clean.tif	133	--rotate=0,0,2.7	eqr/law-nobhill06eqr.tif	2048	cube/law-nobhill06cube.tif	15316x7658	-265
+1906fire/lawrence panos/1906 folsom and 5th/3c36557u-clean.tif	150		eqr/law-soma06eqr.tif	2048	cube/law-soma06cube.tif	15290x7645	0
+1906fire/lawrence panos/1906 hyde and green/6a34650u.tif	111		eqr/law-hydegreen06eqr.tif	2048	cube/law-hydegreen06cube.tif	4388x2194	0
+
 # pillsbury panos:
-1906fire/pillsbury panos/1906 rialto/6a01974u.tif	120		eqr/rialto06eqr.tif	2048	cube/rialto06cube.tif		
-1906fire/pillsbury panos/1906 turk and market/07589u-clean.tif	120		eqr/turk06eqr.tif	2048	cube/turk06cube.tif	33198x16599	317
-#
+1906fire/pillsbury panos/1906 rialto/6a01974u.tif	120		eqr/pb-rialto06eqr.tif	2048	cube/rialto06cube.tif	8896x4448	0
+1906fire/pillsbury panos/1906 turk and market/07589u-clean.tif	120		eqr/pb-turk06eqr.tif	2048	cube/pb-turk06cube.tif	33198x16599	320
+1906fire/pillsbury panos/1906 ferry building 1/6a17900u.tif	150		eqr/pb-ferryA06eqr.tif	2048	cube/pb-ferryA06cube.tif
+1906fire/pillsbury panos/1906 ferry building 2/3c32179u-clean.tif	150		eqr/pb-ferryB06eqr.tif	2048	cube/pb-ferryB06cube.tif
+1906fire/pillsbury panos/1906 grant building/07590u.tif	150		eqr/pb-grant06eqr.tif	2048	cube/pb-grant06cube.tif
+1906fire/pillsbury panos/1906 hopkins institute/6a01988u.tif	150		eqr/pb-hopkins06eqr.tif	2048	cube/pb-hopkins06cube.tif
+1906fire/pillsbury panos/1906 jefferson square/3c33043u-clean.tif	110		eqr/pb-jefferson06eqr.tif	2048	cube/pb-jefferson06cube.tif
+1906fire/pillsbury panos/1906 merchants exchange/3c27621u-clean.tif	150		eqr/pb-merchants06eqr.tif	2048	cube/pb-merchants06cube.tif
+1906fire/pillsbury panos/1906 nob hill/3c33045u-clean.tif	100		eqr/pb-nob06eqr.tif	2048	cube/pb-nob06cube.tif
+1906fire/pillsbury panos/1906 st francis aftermath 1/6a17930u.tif	180		eqr/pb-francisafterA06eqr.tif	2048	cube/pb-francisafterA06cube.tif
+1906fire/pillsbury panos/1906 st francis aftermath 2/07587u.tif	150		eqr/pb-francisafterB06eqr.tif	2048	cube/pb-francisafterB06cube.tif
+1906fire/pillsbury panos/1906 st francis burning 1/07588u.tif	110		eqr/pb-francisburnAeqr.tif	2048	cube/pb-francisburnAcube.tif
+1906fire/pillsbury panos/1906 st francis burning 2/3c30410u-clean.tif	110		eqr/pb-francisburnBeqr.tif	2048	cube/pb-francisburnBcube.tif
+
+
