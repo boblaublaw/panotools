@@ -23,7 +23,7 @@ function cyl2eqr()
     # create a panotools project file:
     /Applications/Hugin/Hugin.app/Contents/MacOS/pto_gen -p 1 -f "${HFOV}" -o "${projectFile}" "${CYL}"
     # specify the eqr parameters
-    /Applications/Hugin/Hugin.app/Contents/MacOS/pano_modify -c --fov=360x180 ${OPTS} --canvas=AUTO -o "${projectFile}" "${projectFile}"
+    /Applications/Hugin/Hugin.app/Contents/MacOS/pano_modify --fov=360x180 ${OPTS} --canvas=AUTO -o "${projectFile}" "${projectFile}"
     # create the EQR tiff
     /Applications/Hugin/HuginStitchProject.app/Contents/MacOS/nona -o "${EQR}" -m TIFF "${projectFile}" -z LZW
     rm ${projectFile}
@@ -64,18 +64,20 @@ function eqr2cube()
     
     if [ ${format} = "360app" ] ; then
         # "Oculus 360 Photos" app requires its own special cubemap layout:
-        flipList="2 5"
-        flopList="0 1 2 3 4"
+
+        # flip turns things upside down
+        flipList="4 5"
+
+        # flop yields a mirror image
+        flopList="0 1 2 3"
         faceOrder=cube_prefix000{1,3,4,5,2,0}.tif
     fi
 
-    # flip turns things upside down
     for x in ${flipList}; do 
         convert cube_prefix000${x}.tif -flip tmp.tif;
         mv tmp.tif cube_prefix000${x}.tif
     done
 
-    # flop yields a mirror image
     for x in ${flopList}; do 
         convert cube_prefix000${x}.tif -flop tmp.tif;
         mv tmp.tif cube_prefix000${x}.tif
