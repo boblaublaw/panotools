@@ -122,7 +122,7 @@ function adjustHorizon()
 
 function process()
 {
-    if [ $# -ne 8 ]; then
+    if [ $# -lt 8 ]; then
         echo "wrong number of args for process()"
         exit 1
     fi
@@ -138,7 +138,11 @@ function process()
     if [ ! -f "${EQR}" ] ; then
         cyl2eqr "${HFOV}" "${SRC}" "${EQR}" "${OPTS}"
         if [ ! -z "${HORIZ}" -a ! -z "${GEOM}" ]; then
-            adjustHorizon "${GEOM}" "${HORIZ}" "${EQR}"
+            if [  ${HORIZ} -ne 0 ]; then
+                adjustHorizon "${GEOM}" "${HORIZ}" "${EQR}"
+            else
+                flatten "${EQR}"
+            fi
         else
             flatten "${EQR}"
         fi
