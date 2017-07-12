@@ -29,11 +29,61 @@ function cyl2eqr()
     rm ${projectFile}
 }
 
+function cube2eqr()
+{
+    if [ $# -ne 3 ]; then
+        echo "wrong number of args for cube2eqr: $#"
+        while [ $# -gt 0 ]; do
+            echo $1
+            shift
+        done
+        echo "cube2eqr <format> <inputTif> <outputTif>"
+        echo "\n\tvalid formats include \"unity6x1\""
+        exit 1
+    fi
+    format="${1}"
+    inputPath="${2}"
+    outputTif="${3}"
+    if [ "${format}" != "unity6x1" ]; then
+        echo "I dont know how to process ${format}"
+        exit 1
+    fi
+    if [ ! -f "${inputPath}" ]; then
+        echo "missing input file: ${inputPath}"
+        exit 1
+    fi
+    # figure out the dimensions:
+    dims=$(identify "${inputPath}" | perl -pe 's/(.+) (\d+)x(\d+)(.+)/$2 $3/g')
+    width=$(echo $dims | cut -f1 -d\ )
+    height=$(echo $dims | cut -f2 -d\ )
+    if [ $((height * 6)) -ne ${width} ] ; then
+        echo "not a 6x1 strip!"
+        exit 1
+    fi
+    # make a tmpdir
+    inputFile=$(basename $inputPath | tr -d "\r\n")
+    tmpDir="./${inputFile}.tmp"
+    mkdir -p "${tmpDir}"
+    # chop the source image into faces:
+    for x in 0 1 2 3 4 5; do
+        offset=$((x * ${height}))
+        #convert -crop 2048x2048+${offset}+0\! "${inputPath}" "${tmpDir}/${x}.tif"
+    done
+
+    # now make the eqr:
+    #/opt/local/libexec/perl5.24/sitebin/cubic2erect ${tmpDir}/front.tif ${tmpDir}/right.tif ${tmpDir}/back.tif ${tmpDir}/left.tif ${tmpDir}/up.tif ${tmpDir}/down.tif ${outputTif}
+    PATH=$PATH:/Applications/Hugin/PTBatcherGUI.app/Contents/MacOS /opt/local/libexec/perl5.24/sitebin/cubic2erect ${tmpDir}/4.tif ${tmpDir}/0.tif ${tmpDir}/5.tif ${tmpDir}/1.tif ${tmpDir}/2.tif ${tmpDir}/3.tif ${outputTif}
+    echo "note that you may need to convert to jpg, scale to 6000x3000, and add metadata in order to post on facebook:"
+    echo "convert -scale 6000x3000 $outputTif equirect.jpg"
+    echo "exiftool -ProjectionType=\"equirectangular\" equirect.jpg"
+}
+
 function eqr2cube()
 {
     if [ $# -lt 4 ]; then
         echo "not enough args for eqr2cube"
-        echo "eq2rcube <format (360app)> <edge length> <inputTif> <outputTif>"
+        echo 'eq2rcube <format> <edge length> <inputTif> <outputTif>'
+        echo "\n\tvalid formats include \"360app\""
         exit 1
     fi
     format="${1}"
@@ -200,6 +250,9 @@ if [ $cmd = "eqr2cube" ]; then
     eqr2cube ${@}
 elif [ $cmd = "cyl2eqr" ]; then
     cyl2eqr ${@}
+elif [ $cmd = "cube2eqr" ]; then
+    # figure out if putting $@ in quotes is needed everywhere else too! XXX TODO
+    cube2eqr "${@}"
 elif [ $cmd = "adjustHorizon" ]; then
     adjustHorizon ${@}
 elif [ $cmd = "process" ]; then
