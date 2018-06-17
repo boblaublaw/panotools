@@ -45,7 +45,7 @@ function cube2eqr()
     inputPath="${2}"
     outputTif="${3}"
     if [ "${format}" != "unity6x1" ]; then
-        echo "I dont know how to process ${format}"
+        echo "I dont know how to cyl2eqr2cube ${format}"
         exit 1
     fi
     if [ ! -f "${inputPath}" ]; then
@@ -170,10 +170,10 @@ function adjustHorizon()
     mv horiz.tif "${EQR}"
 }
 
-function process()
+function cyl2eqr2cube()
 {
     if [ $# -lt 8 ]; then
-        echo "wrong number of args for process()"
+        echo "wrong number of args for cyl2eqr2cube()"
         exit 1
     fi
     SRC="${1}"
@@ -225,7 +225,7 @@ function batch ()
             CUBE=`echo "$line"| cut -f6 -d$'\t'`
             GEOM=`echo "$line"| cut -f7 -d$'\t'`
             HORIZ=`echo "$line"| cut -f8 -d$'\t'`
-            process "${inputDir}/${SRC}" "${HFOV}" "${OPTS}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
+            cyl2eqr2cube "${inputDir}/${SRC}" "${HFOV}" "${OPTS}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
         done
         shift
     done
@@ -234,7 +234,7 @@ function batch ()
 function usage()
 {
     echo
-    echo valid commands are cyl2eqr, eqr2cube, adjustHorizon, flatten, process, batch
+    echo valid commands are cyl2eqr, eqr2cube, adjustHorizon, flatten, cyl2eqr2cube, batch
     echo more usage goes here
     exit 1
 }
@@ -255,8 +255,8 @@ elif [ $cmd = "cube2eqr" ]; then
     cube2eqr "${@}"
 elif [ $cmd = "adjustHorizon" ]; then
     adjustHorizon ${@}
-elif [ $cmd = "process" ]; then
-    process ${@}
+elif [ $cmd = "cyl2eqr2cube" ]; then
+    cyl2eqr2cube ${@}
 elif [ $cmd = "batch" ]; then
     batch ${@}
 else
