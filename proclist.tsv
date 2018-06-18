@@ -1,6 +1,5 @@
-# SRC,HFOV,OPTS,EQR,FACE,CUBE,GEOM,HORIZ
+# SRC,HFOV,POSE,FACE,GEOM,HORIZ
 # tab separated
-
 
 # yaw,pitch,roll degrees where positive value means (image yaw right, camera pitch up, image roll right)
 

@@ -53,9 +53,9 @@ function cube2eqr()
         exit 1
     fi
     # figure out the dimensions:
-    dims=$(identify "${inputPath}" | perl -pe 's/(.+) (\d+)x(\d+)(.+)/$2 $3/g')
-    width=$(echo $dims | cut -f1 -d\ )
-    height=$(echo $dims | cut -f2 -d\ )
+    res=$(identify -verbose "${inputPath}" | grep Geometry | cut -f4 -d\  | cut -f1 -d\+)
+    width=$(echo $res | cut -f1 -d\ )
+    height=$(echo $res | cut -f2 -d\ )
     if [ $((height * 6)) -ne ${width} ] ; then
         echo "not a 6x1 strip!"
         exit 1
@@ -209,18 +209,18 @@ function injectxmp()
     # https://facebook360.fb.com/editing-360-photos-injecting-metadata/
 
     if [ $# -lt 4 ]; then
-        echo wrong args
-        echo "[INFILE] [HFOV] [width_offset (left of 0)] [HORIZ offset(from top to horiz)]"
+        echo injextxmp - wrong number of args:
+        echo "injectxmp [INFILE] [HFOV] [HORIZ offset(from top to horiz)] [POSE]"
         exit 1
     fi
 
     INFILE="$1"
     HFOV="$2"
-    XOFF=$3
-    HORIZ=$4
+    HORIZ=$3
+    POSE=$4
 
-    res=$(identify "${INFILE}" | cut -f3 -d\ )
-    size=$(stat -f %z ${INFILE})
+    res=$(identify -verbose "${INFILE}" | grep Geometry | cut -f4 -d\  | cut -f1 -d\+)
+    size=$(stat -f %z "${INFILE}")
 
     width=$(echo $res | cut -f1 -d\x)
     height=$(echo $res | cut -f2 -d\x)
@@ -246,14 +246,19 @@ function injectxmp()
         exit 1
     fi
 
-
     full_width=$(($width * 360 / $HFOV))
+    xoff=$((((full_width - width)) / 2))
     full_height=$(($full_width / 2))
     vfov=$((180 * height / full_height))
 
     effective_height=$((HORIZ * 2))
     yoff=$((full_height - effective_height))
     yoff=$((yoff / 2))
+
+    heading=$(echo $POSE| cut -f1 -d\,)
+    pitch=$(echo $POSE| cut -f2 -d\,)
+    pitch=$(echo $pitch * -1|bc)
+    roll=$(echo $POSE| cut -f3 -d\,)
 
     echo $width pixels wide
     echo $height pixels tall
@@ -263,8 +268,11 @@ function injectxmp()
     echo $full_height frame height
     echo $HFOV horiz FOV
     echo $vfov vert FOV
-    echo $XOFF "width offset (left)"
+    echo $xoff "width offset (left)"
     echo $yoff "height offset (top)"
+    echo $heading heading
+    echo $pitch pitch
+    echo $roll roll
 
     exiftool -FullPanoWidthPixels=${full_width} \
         -FullPanoHeightPixels=${full_height} \
@@ -275,7 +283,41 @@ function injectxmp()
         -PosePitchDegrees=${pitch} \
         -PoseRollDegrees=${roll} \
         -PoseHeadingDegrees=${heading} \
-        -ProjectionType=equirectangular ${INFILE}
+        -ProjectionType=equirectangular "${INFILE}"
+    rm -f "${INFILE}_original"
+}
+
+function batchxmp()
+{
+    if [ $# -lt 2 ]; then
+        echo "not enough args for batchxmp()"
+        echo "batchxmp <dir> <tsvFile1> ... <tsvFileN>"
+        exit 1
+    fi
+    inputDir="${1}"
+    shift
+    while [ $# -gt 0 ]; do
+        tsvFile="${1}"
+        echo processing $tsvFile
+        grep -v '^#' "${tsvFile}" | grep . | while read line; do
+            SRCPATH=`echo "$line"| cut -f1 -d$'\t'`
+            HFOV=`echo "$line"| cut -f2 -d$'\t'`
+            POSE=`echo "$line"| cut -f3 -d$'\t'`
+            FACE=`echo "$line"| cut -f4 -d$'\t'`
+            GEOM=`echo "$line"| cut -f5 -d$'\t'`
+            HORIZ=`echo "$line"| cut -f6 -d$'\t'`
+
+            subdir=$(dirname "$SRCPATH")
+            filename=$(basename "$SRCPATH" .tif)
+            xmpfile=${inputDir}/${subdir}/${filename}-xmp.jpg
+            if [ ! -f "$xmpfile" ]; then
+                convert "${inputDir}/${SRCPATH}" "$xmpfile"
+            fi
+            injectxmp "$xmpfile" ${HFOV} ${HORIZ} ${POSE}
+            break
+        done
+        shift
+    done
 }
 
 function batchEqrCube ()
