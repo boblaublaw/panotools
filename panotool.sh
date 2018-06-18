@@ -17,13 +17,13 @@ function cyl2eqr()
     HFOV="${1}"
     CYL="${2}"
     EQR="${3}"
-    OPTS="${4}"
+    POSE="${4}"
     projectFile=project.pto
 
     # create a panotools project file:
     /Applications/Hugin/Hugin.app/Contents/MacOS/pto_gen -p 1 -f "${HFOV}" -o "${projectFile}" "${CYL}"
     # specify the eqr parameters
-    /Applications/Hugin/Hugin.app/Contents/MacOS/pano_modify --fov=360x180 ${OPTS} --canvas=AUTO -o "${projectFile}" "${projectFile}"
+    /Applications/Hugin/Hugin.app/Contents/MacOS/pano_modify --fov=360x180 --rotate=${POSE} --canvas=AUTO -o "${projectFile}" "${projectFile}"
     # create the EQR tiff
     /Applications/Hugin/HuginStitchProject.app/Contents/MacOS/nona -o "${EQR}" -m TIFF "${projectFile}" -z LZW
     rm ${projectFile}
@@ -178,7 +178,7 @@ function cyl2eqr2cube()
     fi
     SRC="${1}"
     HFOV="${2}"
-    OPTS="${3}"
+    POSE="${3}"
     EQR="${4}"
     FACE="${5}"
     CUBE="${6}"
@@ -186,7 +186,7 @@ function cyl2eqr2cube()
     HORIZ="${8}"
 
     if [ ! -f "${EQR}" ] ; then
-        cyl2eqr "${HFOV}" "${SRC}" "${EQR}" "${OPTS}"
+        cyl2eqr "${HFOV}" "${SRC}" "${EQR}" "${POSE}"
         if [ ! -z "${HORIZ}" -a ! -z "${GEOM}" ]; then
             if [  ${HORIZ} -ne 0 ]; then
                 adjustHorizon "${GEOM}" "${HORIZ}" "${EQR}"
@@ -203,10 +203,86 @@ function cyl2eqr2cube()
     fi
 }
 
-function batch ()
+function injectxmp()
+{
+    # based on information at:
+    # https://facebook360.fb.com/editing-360-photos-injecting-metadata/
+
+    if [ $# -lt 4 ]; then
+        echo wrong args
+        echo "[INFILE] [HFOV] [width_offset (left of 0)] [HORIZ offset(from top to horiz)]"
+        exit 1
+    fi
+
+    INFILE="$1"
+    HFOV="$2"
+    XOFF=$3
+    HORIZ=$4
+
+    res=$(identify "${INFILE}" | cut -f3 -d\ )
+    size=$(stat -f %z ${INFILE})
+
+    width=$(echo $res | cut -f1 -d\x)
+    height=$(echo $res | cut -f2 -d\x)
+    pixels=$((width * height))
+
+    if [ ${width} -gt 30000 ]; then
+        echo width of $width is wider than 30000 pixels! too wide!
+        exit 1
+    fi
+
+    if [ ${height} -gt 30000 ]; then
+        echo height of $height is higher than 30000 pixels! too high!
+        exit 1
+    fi
+
+    if [ ${pixels} -gt 135000000 ]; then
+        echo total pixels is greater than 135,000,000 - too many pixels!
+        exit 1
+    fi
+
+    if [ ${size} -gt 47185920 ]; then
+        echo "total bytes is greater than 47185920 (45MB) - too many bytes!"
+        exit 1
+    fi
+
+
+    full_width=$(($width * 360 / $HFOV))
+    full_height=$(($full_width / 2))
+    vfov=$((180 * height / full_height))
+
+    effective_height=$((HORIZ * 2))
+    yoff=$((full_height - effective_height))
+    yoff=$((yoff / 2))
+
+    echo $width pixels wide
+    echo $height pixels tall
+    echo $pixels pixels
+    echo $size bytes
+    echo $full_width frame width
+    echo $full_height frame height
+    echo $HFOV horiz FOV
+    echo $vfov vert FOV
+    echo $XOFF "width offset (left)"
+    echo $yoff "height offset (top)"
+
+    exiftool -FullPanoWidthPixels=${full_width} \
+        -FullPanoHeightPixels=${full_height} \
+        -CroppedAreaLeftPixels=${XOFF} \
+        -CroppedAreaTopPixels=${yoff} \
+        -CroppedAreaImageWidthPixels=${width} \
+        -CroppedAreaImageHeightPixels=${height} \
+        -PosePitchDegrees=${pitch} \
+        -PoseRollDegrees=${roll} \
+        -PoseHeadingDegrees=${heading} \
+        -ProjectionType=equirectangular ${INFILE}
+}
+
+function batchEqrCube ()
 {
     if [ $# -lt 3 ]; then
-        echo "not enough args for batch()"
+        echo "not enough args for batchEqrCube()"
+        echo "batchEqrCube <inputDir> <outputDir> <tsvFile1> ... <tsvFileN>"
         exit 1
     fi
     inputDir="${1}"
@@ -219,13 +295,13 @@ function batch ()
         grep -v '^#' "${tsvFile}" | grep . | while read line; do
             SRC=`echo "$line"| cut -f1 -d$'\t'`
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
-            OPTS=`echo "$line"| cut -f3 -d$'\t'`
+            POSE=`echo "$line"| cut -f3 -d$'\t'`
             EQR=`echo "$line"| cut -f4 -d$'\t'`
             FACE=`echo "$line"| cut -f5 -d$'\t'`
             CUBE=`echo "$line"| cut -f6 -d$'\t'`
             GEOM=`echo "$line"| cut -f7 -d$'\t'`
             HORIZ=`echo "$line"| cut -f8 -d$'\t'`
-            cyl2eqr2cube "${inputDir}/${SRC}" "${HFOV}" "${OPTS}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
+            cyl2eqr2cube "${inputDir}/${SRC}" "${HFOV}" "${POSE}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
         done
         shift
     done
@@ -234,7 +310,7 @@ function batch ()
 function usage()
 {
     echo
-    echo valid commands are cyl2eqr, eqr2cube, adjustHorizon, flatten, cyl2eqr2cube, batch
+    echo valid commands are cyl2eqr, eqr2cube, adjustHorizon, flatten, cyl2eqr2cube, batchEqrCube, injectXmp, batchXmp
     echo more usage goes here
     exit 1
 }
@@ -257,8 +333,12 @@ elif [ $cmd = "adjustHorizon" ]; then
     adjustHorizon ${@}
 elif [ $cmd = "cyl2eqr2cube" ]; then
     cyl2eqr2cube ${@}
-elif [ $cmd = "batch" ]; then
-    batch ${@}
+elif [ $cmd = "batchEqrCube" ]; then
+    batchEqrCube ${@}
+elif [ $cmd = "injectXmp" ]; then
+    injectxmp ${@}
+elif [ $cmd = "batchXmp" ]; then
+    batchxmp ${@}
 else
     echo "unknown command: $cmd"
     usage 
