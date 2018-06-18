@@ -304,7 +304,6 @@ function batchEqrCube ()
             cubefile=${inputDir}/${subdir}/${filename}-cube.tif
 
             cyl2eqr2cube "${inputDir}/${SRCPATH}" "${HFOV}" "${POSE}" "${eqrfile}" "${FACE}" "${cubefile}" "${GEOM}" "${HORIZ}"
-            exit 0
         done
         shift
     done
