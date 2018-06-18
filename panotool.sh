@@ -45,7 +45,7 @@ function cube2eqr()
     inputPath="${2}"
     outputTif="${3}"
     if [ "${format}" != "unity6x1" ]; then
-        echo "I dont know how to cyl2eqr2cube ${format}"
+        echo "I dont know how to process ${format}"
         exit 1
     fi
     if [ ! -f "${inputPath}" ]; then
@@ -90,9 +90,8 @@ function eqr2cube()
     edge="${2}"
     inputTif="${3}"
     outputTif="${4}"
-    
+
     b=`basename "${inputTif}" .tif`
-    inputTif="${PWD}/${inputTif}"
 
     # should be a mktemp soon XXX TODO
     tmpdir="${b}.tmp"
@@ -124,16 +123,17 @@ function eqr2cube()
     fi
 
     for x in ${flipList}; do 
-        convert cube_prefix000${x}.tif -flip tmp.tif;
+        convert cube_prefix000${x}.tif -flip tmp.tif
         mv tmp.tif cube_prefix000${x}.tif
     done
 
     for x in ${flopList}; do 
-        convert cube_prefix000${x}.tif -flop tmp.tif;
+        convert cube_prefix000${x}.tif -flop tmp.tif
         mv tmp.tif cube_prefix000${x}.tif
     done
 
-    eval montage ${faceOrder} -tile 6x1 -geometry ${edge}x${edge}+0+0 ../${outputTif}
+    x=$(eval ls ${faceOrder})
+    montage ${x} -tile 6x1 -geometry ${edge}x${edge}+0+0 "${outputTif}"
 
     popd
     rm -rf "${tmpdir}"
@@ -280,28 +280,31 @@ function injectxmp()
 
 function batchEqrCube ()
 {
-    if [ $# -lt 3 ]; then
+    if [ $# -lt 2 ]; then
         echo "not enough args for batchEqrCube()"
-        echo "batchEqrCube <inputDir> <outputDir> <tsvFile1> ... <tsvFileN>"
+        echo "batchEqrCube <dir> <tsvFile1> ... <tsvFileN>"
         exit 1
     fi
     inputDir="${1}"
-    shift
-    outputDir="${1}"
     shift
     while [ $# -gt 0 ]; do
         tsvFile="${1}"
         echo processing $tsvFile
         grep -v '^#' "${tsvFile}" | grep . | while read line; do
-            SRC=`echo "$line"| cut -f1 -d$'\t'`
+            SRCPATH=`echo "$line"| cut -f1 -d$'\t'`
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
             POSE=`echo "$line"| cut -f3 -d$'\t'`
-            EQR=`echo "$line"| cut -f4 -d$'\t'`
-            FACE=`echo "$line"| cut -f5 -d$'\t'`
-            CUBE=`echo "$line"| cut -f6 -d$'\t'`
-            GEOM=`echo "$line"| cut -f7 -d$'\t'`
-            HORIZ=`echo "$line"| cut -f8 -d$'\t'`
-            cyl2eqr2cube "${inputDir}/${SRC}" "${HFOV}" "${POSE}" "${outputDir}/${EQR}" "${FACE}" "${outputDir}/${CUBE}" "${GEOM}" "${HORIZ}"
+            FACE=`echo "$line"| cut -f4 -d$'\t'`
+            GEOM=`echo "$line"| cut -f5 -d$'\t'`
+            HORIZ=`echo "$line"| cut -f6 -d$'\t'`
+
+            subdir=$(dirname "$SRCPATH")
+            filename=$(basename "$SRCPATH" .tif)
+            eqrfile=${inputDir}/${subdir}/${filename}-eqr.tif
+            cubefile=${inputDir}/${subdir}/${filename}-cube.tif
+
+            cyl2eqr2cube "${inputDir}/${SRCPATH}" "${HFOV}" "${POSE}" "${eqrfile}" "${FACE}" "${cubefile}" "${GEOM}" "${HORIZ}"
+            exit 0
         done
         shift
     done
@@ -323,22 +326,22 @@ fi
 cmd=${1}
 shift
 if [ $cmd = "eqr2cube" ]; then
-    eqr2cube ${@}
+    eqr2cube "${@}"
 elif [ $cmd = "cyl2eqr" ]; then
-    cyl2eqr ${@}
+    cyl2eqr "${@}"
 elif [ $cmd = "cube2eqr" ]; then
     # figure out if putting $@ in quotes is needed everywhere else too! XXX TODO
     cube2eqr "${@}"
 elif [ $cmd = "adjustHorizon" ]; then
-    adjustHorizon ${@}
+    adjustHorizon "${@}"
 elif [ $cmd = "cyl2eqr2cube" ]; then
-    cyl2eqr2cube ${@}
+    cyl2eqr2cube "${@}"
 elif [ $cmd = "batchEqrCube" ]; then
-    batchEqrCube ${@}
+    batchEqrCube "${@}"
 elif [ $cmd = "injectXmp" ]; then
-    injectxmp ${@}
+    injectxmp "${@}"
 elif [ $cmd = "batchXmp" ]; then
-    batchxmp ${@}
+    batchxmp "${@}"
 else
     echo "unknown command: $cmd"
     usage 
