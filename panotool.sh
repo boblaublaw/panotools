@@ -257,7 +257,7 @@ function injectxmp()
 
     heading=$(echo $POSE| cut -f1 -d\,)
     pitch=$(echo $POSE| cut -f2 -d\,)
-    pitch=$(echo $pitch * -1|bc)
+    #pitch=`echo ${pitch} \* -1|bc`
     roll=$(echo $POSE| cut -f3 -d\,)
 
     echo $width pixels wide
