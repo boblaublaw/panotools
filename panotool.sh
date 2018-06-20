@@ -11,13 +11,16 @@ function cyl2eqr()
 {
     if [ $# -lt 3 ]; then
         echo "not enough args for cyl2eqr"
-        echo "cyl2eqr <HFOV> <inputTif> <outputTiff> [nona options]"
+        echo "cyl2eqr <HFOV> <inputTif> <outputTiff> [pose] [horiz] [fullgeom]"
         exit 1
     fi
     HFOV="${1}"
     CYL="${2}"
     EQR="${3}"
     POSE="${4}"
+    HORIZ="${5}"
+    FULLGEOM="${6}"
+
     projectFile=project.pto
 
     # create a panotools project file:
@@ -27,6 +30,16 @@ function cyl2eqr()
     # create the EQR tiff
     /Applications/Hugin/HuginStitchProject.app/Contents/MacOS/nona -o "${EQR}" -m TIFF "${projectFile}" -z LZW
     rm ${projectFile}
+
+    if [ ! -z "${HORIZ}" -a ! -z "${FULLGEOM}" ]; then
+        if [  ${HORIZ} -ne 0 ]; then
+            recropImage "${FULLGEOM}" "${HORIZ}" "${EQR}"
+        else
+            flatten "${EQR}"
+        fi
+    else
+        flatten "${EQR}"
+    fi
 }
 
 function cube2eqr()
@@ -170,39 +183,6 @@ function recropImage()
     mv horiz.tif "${EQR}"
 }
 
-function cyl2eqr2cube()
-{
-    if [ $# -lt 8 ]; then
-        echo "wrong number of args for cyl2eqr2cube()"
-        exit 1
-    fi
-    SRC="${1}"
-    HFOV="${2}"
-    POSE="${3}"
-    EQR="${4}"
-    FACE="${5}"
-    CUBE="${6}"
-    FULLGEOM="${7}"
-    HORIZ="${8}"
-
-    if [ ! -f "${EQR}" ] ; then
-        cyl2eqr "${HFOV}" "${SRC}" "${EQR}" "${POSE}"
-        if [ ! -z "${HORIZ}" -a ! -z "${FULLGEOM}" ]; then
-            if [  ${HORIZ} -ne 0 ]; then
-                recropImage "${FULLGEOM}" "${HORIZ}" "${EQR}"
-            else
-                flatten "${EQR}"
-            fi
-        else
-            flatten "${EQR}"
-        fi
-        rm -f "${CUBE}"
-    fi
-    if [ ! -f "${CUBE}" ]; then
-        eqr2cube 360app "${FACE}" "${EQR}" "${CUBE}"
-    fi
-}
-
 function injectxmp()
 {
     # based on information at:
@@ -287,18 +267,20 @@ function injectxmp()
     rm -f "${INFILE}_original"
 }
 
-function batchxmp()
+function batch()
 {
-    if [ $# -lt 2 ]; then
+    if [ $# -lt 3 ]; then
         echo "not enough args for batchxmp()"
-        echo "batchxmp <dir> <tsvFile1> ... <tsvFileN>"
+        echo "batchxmp <dir> <tsvFile> <op1> <op2> ... <opN>"
         exit 1
     fi
     inputDir="${1}"
     shift
+    tsvFile="${1}"
+    shift
     while [ $# -gt 0 ]; do
-        tsvFile="${1}"
-        echo processing $tsvFile
+        op="${1}"
+        echo processing $tsvFile as $op
         grep -v '^#' "${tsvFile}" | grep . | while read line; do
             SRCPATH=`echo "$line"| cut -f1 -d$'\t'`
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
@@ -310,43 +292,34 @@ function batchxmp()
 
             subdir=$(dirname "$SRCPATH")
             filename=$(basename "$SRCPATH" .tif)
+            cylfile=${inputDir}/${subdir}/${filename}.tif
             xmpfile=${inputDir}/${subdir}/${filename}-xmp.jpg
-            if [ ! -f "$xmpfile" ]; then
-                convert "${inputDir}/${SRCPATH}" "$xmpfile"
-            fi
-            injectxmp "$xmpfile" ${HFOV} ${HORIZMEASURE} ${POSE}
-        done
-        shift
-    done
-}
-
-function batchEqrCube ()
-{
-    if [ $# -lt 2 ]; then
-        echo "not enough args for batchEqrCube()"
-        echo "batchEqrCube <dir> <tsvFile1> ... <tsvFileN>"
-        exit 1
-    fi
-    inputDir="${1}"
-    shift
-    while [ $# -gt 0 ]; do
-        tsvFile="${1}"
-        echo processing $tsvFile
-        grep -v '^#' "${tsvFile}" | grep . | while read line; do
-            SRCPATH=`echo "$line"| cut -f1 -d$'\t'`
-            HFOV=`echo "$line"| cut -f2 -d$'\t'`
-            POSE=`echo "$line"| cut -f3 -d$'\t'`
-            FACE=`echo "$line"| cut -f4 -d$'\t'`
-            FULLGEOM=`echo "$line"| cut -f5 -d$'\t'`
-            HORIZADJUST=`echo "$line"| cut -f6 -d$'\t'`
-            HORIZMEASURE=`echo "$line"| cut -f7 -d$'\t'`
-
-            subdir=$(dirname "$SRCPATH")
-            filename=$(basename "$SRCPATH" .tif)
             eqrfile=${inputDir}/${subdir}/${filename}-eqr.tif
             cubefile=${inputDir}/${subdir}/${filename}-cube.tif
 
-            cyl2eqr2cube "${inputDir}/${SRCPATH}" "${HFOV}" "${POSE}" "${eqrfile}" "${FACE}" "${cubefile}" "${FULLGEOM}" "${HORIZADJUST}"
+            if [ $op = "xmp" ]; then
+                if [ ! -f "$xmpfile" ]; then
+                    convert "${inputDir}/${SRCPATH}" "$xmpfile"
+                fi
+                injectxmp "$xmpfile" ${HFOV} ${HORIZMEASURE} ${POSE}
+            elif [ $op = "eqr" ]; then
+                if [ ! -f "${eqrfile}" ] ; then
+                    cyl2eqr "${HFOV}" "${cylfile}" "${eqrfile}" "${POSE}" "${HORIZADJUST}" "${FULLGEOM}"
+                    rm -f "${cubefile}"
+                fi
+            elif [ $op = "cube" ] ; then
+                if [ ! -f "${eqrfile}" ]; then
+                    echo "need the eqr file before we can make the cube file: $eqrfile"
+                    exit 1
+                else
+                    if [ ! -f "${cubefile}" ]; then
+                        eqr2cube 360app "${FACE}" "${eqrfile}" "${cubefile}"
+                    fi
+                fi
+            else
+                echo "no idea what operation $op is supposed to be!"
+                exit 1
+            fi
         done
         shift
     done
@@ -355,7 +328,7 @@ function batchEqrCube ()
 function usage()
 {
     echo
-    echo valid commands are cyl2eqr, eqr2cube, recropImage, flatten, cyl2eqr2cube, batchEqrCube, injectXmp, batchXmp
+    echo valid commands are cyl2eqr, eqr2cube, recropImage, flatten, batch, injectXmp
     echo more usage goes here
     exit 1
 }
@@ -376,14 +349,10 @@ elif [ $cmd = "cube2eqr" ]; then
     cube2eqr "${@}"
 elif [ $cmd = "recropImage" ]; then
     recropImage "${@}"
-elif [ $cmd = "cyl2eqr2cube" ]; then
-    cyl2eqr2cube "${@}"
-elif [ $cmd = "batchEqrCube" ]; then
-    batchEqrCube "${@}"
 elif [ $cmd = "injectXmp" ]; then
     injectxmp "${@}"
-elif [ $cmd = "batchXmp" ]; then
-    batchxmp "${@}"
+elif [ $cmd = "batch" ]; then
+    batch "${@}"
 else
     echo "unknown command: $cmd"
     usage 
