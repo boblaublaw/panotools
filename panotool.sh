@@ -3,7 +3,7 @@ set -e
 
 function cyl2rect()
 {
-    echo "TODO XXX"
+    echo "XXX"
     exit 1
 }
 
@@ -93,7 +93,7 @@ function eqr2cube()
 
     b=`basename "${inputTif}" .tif`
 
-    # should be a mktemp soon XXX TODO
+    # should be a mktemp soon XXX
     tmpdir="${b}.tmp"
 
     mkdir -p "$tmpdir"
@@ -148,16 +148,16 @@ function flatten()
     fi
     EQR="${1}"
 
-    # need a mktemp XXX TODO
+    # need a mktemp XXX
     convert -flatten "${EQR}" -background black -alpha remove flat.tif
     mv flat.tif "${EQR}"
 }
 
-function adjustHorizon() 
+function recropImage()
 {
     if [ $# -lt 2 ]; then
-        echo "not enough args for adjustHorizon"
-        echo "adjustHorizon <geom> <horizonPixelAdjust> <inputTif>"
+        echo "not enough args for recropImage"
+        echo "recropImage <geom> <horizonPixelAdjust> <inputTif>"
         exit 1
     fi
     geom="${1}"
@@ -165,7 +165,7 @@ function adjustHorizon()
     EQR="${3}"
     echo adjusting horizon by $horizonOffset pixels
 
-    # need a mktemp XXX TODO
+    # need a mktemp XXX
     convert "${EQR}" -crop ${geom}+0+${horizonOffset}\! -background black -flatten -alpha remove horiz.tif
     mv horiz.tif "${EQR}"
 }
@@ -182,14 +182,14 @@ function cyl2eqr2cube()
     EQR="${4}"
     FACE="${5}"
     CUBE="${6}"
-    GEOM="${7}"
+    FULLGEOM="${7}"
     HORIZ="${8}"
 
     if [ ! -f "${EQR}" ] ; then
         cyl2eqr "${HFOV}" "${SRC}" "${EQR}" "${POSE}"
-        if [ ! -z "${HORIZ}" -a ! -z "${GEOM}" ]; then
+        if [ ! -z "${HORIZ}" -a ! -z "${FULLGEOM}" ]; then
             if [  ${HORIZ} -ne 0 ]; then
-                adjustHorizon "${GEOM}" "${HORIZ}" "${EQR}"
+                recropImage "${FULLGEOM}" "${HORIZ}" "${EQR}"
             else
                 flatten "${EQR}"
             fi
@@ -209,7 +209,7 @@ function injectxmp()
     # https://facebook360.fb.com/editing-360-photos-injecting-metadata/
 
     if [ $# -lt 4 ]; then
-        echo injextxmp - wrong number of args:
+        echo injectxmp - wrong number of args:
         echo "injectxmp [INFILE] [HFOV] [HORIZ offset(from top to horiz)] [POSE]"
         exit 1
     fi
@@ -219,9 +219,9 @@ function injectxmp()
     HORIZ=$3
     POSE=$4
 
-    res=$(identify -verbose "${INFILE}" | grep Geometry | cut -f4 -d\  | cut -f1 -d\+)
     size=$(stat -f %z "${INFILE}")
 
+    res=$(identify -verbose "${INFILE}" | grep Geometry | cut -f4 -d\  | cut -f1 -d\+)
     width=$(echo $res | cut -f1 -d\x)
     height=$(echo $res | cut -f2 -d\x)
     pixels=$((width * height))
@@ -304,8 +304,9 @@ function batchxmp()
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
             POSE=`echo "$line"| cut -f3 -d$'\t'`
             FACE=`echo "$line"| cut -f4 -d$'\t'`
-            GEOM=`echo "$line"| cut -f5 -d$'\t'`
-            HORIZ=`echo "$line"| cut -f6 -d$'\t'`
+            FULLGEOM=`echo "$line"| cut -f5 -d$'\t'`
+            HORIZADJUST=`echo "$line"| cut -f6 -d$'\t'`
+            HORIZMEASURE=`echo "$line"| cut -f7 -d$'\t'`
 
             subdir=$(dirname "$SRCPATH")
             filename=$(basename "$SRCPATH" .tif)
@@ -313,8 +314,7 @@ function batchxmp()
             if [ ! -f "$xmpfile" ]; then
                 convert "${inputDir}/${SRCPATH}" "$xmpfile"
             fi
-            injectxmp "$xmpfile" ${HFOV} ${HORIZ} ${POSE}
-            break
+            injectxmp "$xmpfile" ${HFOV} ${HORIZMEASURE} ${POSE}
         done
         shift
     done
@@ -337,15 +337,16 @@ function batchEqrCube ()
             HFOV=`echo "$line"| cut -f2 -d$'\t'`
             POSE=`echo "$line"| cut -f3 -d$'\t'`
             FACE=`echo "$line"| cut -f4 -d$'\t'`
-            GEOM=`echo "$line"| cut -f5 -d$'\t'`
-            HORIZ=`echo "$line"| cut -f6 -d$'\t'`
+            FULLGEOM=`echo "$line"| cut -f5 -d$'\t'`
+            HORIZADJUST=`echo "$line"| cut -f6 -d$'\t'`
+            HORIZMEASURE=`echo "$line"| cut -f7 -d$'\t'`
 
             subdir=$(dirname "$SRCPATH")
             filename=$(basename "$SRCPATH" .tif)
             eqrfile=${inputDir}/${subdir}/${filename}-eqr.tif
             cubefile=${inputDir}/${subdir}/${filename}-cube.tif
 
-            cyl2eqr2cube "${inputDir}/${SRCPATH}" "${HFOV}" "${POSE}" "${eqrfile}" "${FACE}" "${cubefile}" "${GEOM}" "${HORIZ}"
+            cyl2eqr2cube "${inputDir}/${SRCPATH}" "${HFOV}" "${POSE}" "${eqrfile}" "${FACE}" "${cubefile}" "${FULLGEOM}" "${HORIZADJUST}"
         done
         shift
     done
@@ -354,7 +355,7 @@ function batchEqrCube ()
 function usage()
 {
     echo
-    echo valid commands are cyl2eqr, eqr2cube, adjustHorizon, flatten, cyl2eqr2cube, batchEqrCube, injectXmp, batchXmp
+    echo valid commands are cyl2eqr, eqr2cube, recropImage, flatten, cyl2eqr2cube, batchEqrCube, injectXmp, batchXmp
     echo more usage goes here
     exit 1
 }
@@ -371,10 +372,10 @@ if [ $cmd = "eqr2cube" ]; then
 elif [ $cmd = "cyl2eqr" ]; then
     cyl2eqr "${@}"
 elif [ $cmd = "cube2eqr" ]; then
-    # figure out if putting $@ in quotes is needed everywhere else too! XXX TODO
+    # figure out if putting $@ in quotes is needed everywhere else too! XXX
     cube2eqr "${@}"
-elif [ $cmd = "adjustHorizon" ]; then
-    adjustHorizon "${@}"
+elif [ $cmd = "recropImage" ]; then
+    recropImage "${@}"
 elif [ $cmd = "cyl2eqr2cube" ]; then
     cyl2eqr2cube "${@}"
 elif [ $cmd = "batchEqrCube" ]; then
