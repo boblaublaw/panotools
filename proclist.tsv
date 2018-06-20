@@ -4,26 +4,26 @@
 # yaw,pitch,roll degrees where positive value means (image yaw right, camera pitch up, image roll right)
 
 # lawrence panos:
-lawrence panos/19060528 waterfront/07823u.tif	141	0,-5,3	2048	29896x14948	-504 1391
-lawrence panos/19060505 tenderloin/07824u.tif	126	0,-2,8	2048	37458x18729	-625	0
-lawrence panos/19060529 nob hill/3c36183u-clean.tif	133	0,0,3.2	2048	15316x7658	-265	0
-lawrence panos/1906 folsom and 5th/3c36557u-clean.tif	150	0,0,-3.5	2048	12984x6492	-395	0
-lawrence panos/1906 hyde and green/6a34650u.tif	111	0,-1.5,5	2048	4388x2194	-115	0
+lawrence panos/19060528 waterfront/07823u.tif	141	0,-5,3	2048	29896x14948	-504	1391
+lawrence panos/19060505 tenderloin/07824u.tif	126	0,-2,8	2048	37458x18729	-625	2167
+lawrence panos/19060529 nob hill/3c36183u-clean.tif	133	0,0,3.2	2048	15316x7658	-265	950
+lawrence panos/1906 folsom and 5th/3c36557u-clean.tif	150	0,0,-3.5	2048	12984x6492	-395	760
+lawrence panos/1906 hyde and green/6a34650u.tif	111	0,-1.5,5	2048	4388x2194	-115	221
 
 # pillsbury panos:
-pillsbury panos/1906 rialto/6a01974u.tif	150	0,0,0	2048	7116x3558	0	0
-pillsbury panos/1906 turk and market/07589u-clean.tif	150	0,0,0	2048	26558x13279	150	0
-pillsbury panos/1906 ferry building 1/6a17900u.tif	150	0,0,0	2048	12536x6268	-60	0
-pillsbury panos/1906 ferry building 2/3c32179u-clean.tif	150	0,-1.5,0	2048	8930x4465	-30	0
-pillsbury panos/1906 grant building/07590u.tif	200	0,0,0	2048	20128x10064	-50	0
-pillsbury panos/1906 hopkins institute/6a01988u.tif	180	0,0,0.5	2048	5218x2609	-40	0
-pillsbury panos/1906 jefferson square/3c33043u-clean.tif	130	0,0,0	2048	10266x5133	0	0
-pillsbury panos/1906 merchants exchange/3c27621u-clean.tif	180	0,0,0	2048	7014x3507	-40	0
-pillsbury panos/1906 nob hill/3c33045u-clean.tif	120	0,0,0	2048	10410x5205	0	0
-pillsbury panos/1906 st francis aftermath 1/6a17930u.tif	200	0,0,0	2048	9322x4661	-60	0
-pillsbury panos/1906 st francis aftermath 2/07587u.tif	200	0,0,0	2048	20216x10108	0	0
-pillsbury panos/1906 st francis burning 1/07588u.tif	150	0,0,0	2048	19774x9887	-220	0
-pillsbury panos/1906 st francis burning 2/3c30410u-clean.tif	130	0,0,0	2048	10098x5049	0	0
+pillsbury panos/1906 rialto/6a01974u.tif	150	0,0,0	2048	7116x3558	0	374
+pillsbury panos/1906 turk and market/07589u-clean.tif	150	0,0,0	2048	26558x13279	150	1640
+pillsbury panos/1906 ferry building 1/6a17900u.tif	150	0,0,0	2048	12536x6268	-60	252
+pillsbury panos/1906 ferry building 2/3c32179u-clean.tif	150	0,-1.5,0	2048	8930x4465	-30	326
+pillsbury panos/1906 grant building/07590u.tif	200	0,0,0	2048	20128x10064	-50	1092
+pillsbury panos/1906 hopkins institute/6a01988u.tif	180	0,0,0.5	2048	5218x2609	-40	290
+pillsbury panos/1906 jefferson square/3c33043u-clean.tif	130	0,0,0	2048	10266x5133	0	518
+pillsbury panos/1906 merchants exchange/3c27621u-clean.tif	180	0,0,0	2048	7014x3507	-40	336
+pillsbury panos/1906 nob hill/3c33045u-clean.tif	120	0,0,0	2048	10410x5205	0	527
+pillsbury panos/1906 st francis aftermath 1/6a17930u.tif	200	0,0,0	2048	9322x4661	-60	320
+pillsbury panos/1906 st francis aftermath 2/07587u.tif	200	0,0,0	2048	20216x10108	0	1210
+pillsbury panos/1906 st francis burning 1/07588u.tif	150	0,0,0	2048	19774x9887	-220	1048
+pillsbury panos/1906 st francis burning 2/3c30410u-clean.tif	130	0,0,0	2048	10098x5049	0	431
 
 # muybridge
-muybridge 1876/MuyBridgePanoSanFrancisco1878EQR-huge-fixed-clean.tif	360	0,0,0	2048	25460x12730	-770	0
+muybridge 1876/MuyBridgePanoSanFrancisco1878EQR-huge-fixed-clean.tif	360	0,0,0	2048	25460x12730	-770	805
