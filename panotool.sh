@@ -263,6 +263,8 @@ function injectxmp()
         -PosePitchDegrees=${pitch} \
         -PoseRollDegrees=${roll} \
         -PoseHeadingDegrees=${heading} \
+        -InitialHorizontalFOVDegrees=${HFOV} \
+        -InitialVerticalFOVDegrees=${vfov} \
         -ProjectionType=equirectangular "${INFILE}"
     rm -f "${INFILE}_original"
 }
